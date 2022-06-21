@@ -1,6 +1,7 @@
 //server creation
 //1. import express
 const express = require('express')
+const jwt = require('jsonwebtoken')
 
 const dataService = require('./services/data.service')
 
@@ -10,7 +11,34 @@ const app = express()
 //parse json data
 app.use(express.json())
 
+//Application specific middleware
+const appMiddleware=(req,res,next)=>{
+  console.log("Application specific middleware");
+  next()
+}
+
+//use middleware in app
+app.use(appMiddleware)
+
 //bank server
+const jwtMiddleware = (req,res,next)=>{
+  //fetch token
+  try{
+    token=req.headers['x-access-token']
+    //verify token
+    const data=jwt.verify(token,'secretkey123')
+    console.log(data);
+    next()
+  }
+  catch{
+    res.status(401).json({
+      status:false,
+      statusCode:401,
+      message:'Please Log In'
+    })
+  }
+}
+
 //register API
 app.post('/register',(req,res)=>{
   //register solving  
@@ -28,7 +56,7 @@ app.post('/login',(req,res)=>{
   })
 
   //deposit API
-app.post('/deposit',(req,res)=>{
+app.post('/deposit',jwtMiddleware,(req,res)=>{
     //deposit solving  
     console.log(req);
   const result = dataService.deposit(req.body.acno,req.body.pswd,req.body.amt)
@@ -36,7 +64,7 @@ app.post('/deposit',(req,res)=>{
   })
 
   //withdraw API
-app.post('/withdraw',(req,res)=>{
+app.post('/withdraw',jwtMiddleware,(req,res)=>{
     //withdraw solving  
     console.log(req);
   const result = dataService.withdraw(req.body.acno,req.body.pswd,req.body.amt)
@@ -44,12 +72,14 @@ app.post('/withdraw',(req,res)=>{
   })
 
   //Transaction API
-app.post('/getTransaction',(req,res)=>{
+app.post('/getTransaction',jwtMiddleware,(req,res)=>{
   //Transaction solving  
   console.log(req);
 const result = dataService.getTransaction(req.body.acno)
 res.status(result.statusCode).json(result)
 })
+
+
 
 //user rqst resolving
 
