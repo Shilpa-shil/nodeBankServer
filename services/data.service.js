@@ -110,54 +110,53 @@ return {
 //withdraw
 const withdraw = (acno, pswd, amt) => {
   var amount = parseInt(amt)
-  if (acno in db) {
-    if (pswd == db[acno]["password"]) {
-      if (db[acno]["balance"] > amount) {
-
-        db[acno]["balance"] -= amount
-        db[acno].transaction.push({
-          type: "DEBIT",
-          amount: amount
-        })
-        return {
-          status: true,
-          message: amount + " debited successfully.. New balance is " + db[acno]["balance"],
-          statusCode: 200
-        }
-      }
-      else {
-        return {
-          status: false,
-          message: "insufficient balance",
-          statusCode: 422
-        }
-      }
-    }
-    else {
-      return {
-        status: false,
-        message: "incorrect password",
-        statusCode: 401
-      }
-    }
+  return db.User.findOne({
+    acno,pswd
+  }).then(user=>{
+  if(user){
+    if(user.balance > amount)
+    {
+      user.balance -=amount
+      user.transaction.push({
+        type: "DEBIT",
+        amount: amount
+      })
+    user.save()
+  
+  return {
+    status: true,
+    message: amount + " debited successfully.. New balance is " + user.balance,
+    statusCode: 200
+  }
   }
   else {
-    return {
-      status: false,
-      message: "User doesnot exist",
-      statusCode: 401
-    }
+  return {
+    status: false,
+    message: "insufficient balance",
+    statusCode: 401
+  }
   }
 }
-
+else{
+  return{
+    status: false,
+    message: "Invalid account number or password",
+    statusCode: 401
+  }
+}
+})
+}
+  
 //transaction
 const getTransaction = (acno) => {
-  if (acno in db) {
+  return db.User.findOne({
+    acno
+  }).then(user=>{
+  if (user) {
     return {
       status: true,
       statusCode: 200,
-
-      transaction: db[acno].transaction
+      transaction: user.transaction
     }
   }
   else {
@@ -167,6 +166,7 @@ const getTransaction = (acno) => {
       statusCode: 401
     }
   }
+})
 }
 //export
 module.exports = {

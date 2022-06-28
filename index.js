@@ -3,10 +3,18 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
 
+//import cors
+const cors = require('cors')
+
 const dataService = require('./services/data.service')
 
 //create server application using express
 const app = express()
+
+//cors use in server app
+app.use(cors({
+  origin:'http://localhost:4200'
+}))
 
 //parse json data
 app.use(express.json())
@@ -70,20 +78,21 @@ app.post('/deposit', jwtMiddleware, (req, res) => {
 
 //withdraw API
 app.post('/withdraw', jwtMiddleware, (req, res) => {
-  //withdraw solving  
-  console.log(req);
-  const result = dataService.withdraw(req.body.acno, req.body.pswd, req.body.amt)
+  //withdraw solving  -async
+  dataService.withdraw(req.body.acno, req.body.pswd, req.body.amt)
+  .then(result => {
   res.status(result.statusCode).json(result)
+})
 })
 
 //Transaction API
 app.post('/getTransaction', jwtMiddleware, (req, res) => {
-  //Transaction solving  
-  console.log(req);
-  const result = dataService.getTransaction(req.body.acno)
+  //Transaction solving - async
+dataService.getTransaction(req.body.acno)
+.then(result => {
   res.status(result.statusCode).json(result)
 })
-
+})
 
 
 //user rqst resolving
