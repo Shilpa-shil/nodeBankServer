@@ -36,6 +36,7 @@ const jwtMiddleware = (req, res, next) => {
     //verify token
     const data = jwt.verify(token, 'secretkey123')
     console.log(data);
+    req.currentAcno = data.currentAcno
     next()
   }
   catch {
@@ -69,7 +70,7 @@ app.post('/login', (req, res) => {
 //deposit API
 app.post('/deposit', jwtMiddleware, (req, res) => {
   //deposit solving  -async
-  dataService.deposit(req.body.acno, req.body.pswd, req.body.amt)
+  dataService.deposit(req,req.body.acno, req.body.pswd, req.body.amt)
   .then(result => {
     res.status(result.statusCode).json(result)
   })
@@ -79,7 +80,7 @@ app.post('/deposit', jwtMiddleware, (req, res) => {
 //withdraw API
 app.post('/withdraw', jwtMiddleware, (req, res) => {
   //withdraw solving  -async
-  dataService.withdraw(req.body.acno, req.body.pswd, req.body.amt)
+  dataService.withdraw(req,req.body.acno, req.body.pswd, req.body.amt)
   .then(result => {
   res.status(result.statusCode).json(result)
 })
