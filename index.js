@@ -95,6 +95,14 @@ dataService.getTransaction(req.body.acno)
 })
 })
 
+//deleteAcc api
+app.delete('/deleteAcc/:acno',jwtMiddleware,(req,res)=>{
+  //delete solving
+  dataService.deleteAcc(req.params.acno)
+  .then(result =>{
+    res.status(result.statusCode).json(result)
+  })
+})
 
 //user rqst resolving
 
